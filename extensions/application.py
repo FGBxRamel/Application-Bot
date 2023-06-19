@@ -60,6 +60,7 @@ class ApplicationCommand(i.Extension):
             )
         ]
         await channel.send(embed=setup_embed, components=components)
+        await ctx.send("Setup erfolgreich!", ephemeral=True)
 
 
 def setup(bot):
