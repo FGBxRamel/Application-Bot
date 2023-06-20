@@ -33,7 +33,7 @@ class ApplicationCommand(i.Extension):
         answers = self.cur.fetchone()
         member = await self.bot.fetch_member(user_id, scope_ids[0])
         app_embed = Embed(
-            title="♔FALLING SKY♔\nTeam Application",
+            title="♔FALLING SKY♔\nClan Application",
             description=f"{str(member.mention)} hat eine Bewerbung abgeschlossen!",
             color=BrandColors.FUCHSIA.value
         )
@@ -72,7 +72,7 @@ class ApplicationCommand(i.Extension):
     )
     async def setup(self, ctx: i.SlashContext, channel: i.models.discord.channel.GuildText):
         setup_embed = i.Embed(
-            title="♔FALLING SKY♔\nTeam Application",
+            title="♔FALLING SKY♔\nClan Application",
             description="""<a:6544_heartarrow_purple:956574404647739503> Bitte klicke auf den entsprechenden Button,\
                 um eine Bewerbung zu starten und beantworte danach die Fragen.\n\n\
                 <a:bluearrowheartright:921367937829466152> Please click on the corresponding button to start an\
@@ -81,7 +81,7 @@ class ApplicationCommand(i.Extension):
             thumbnail=i.EmbedAttachment(
                 url="https://cdn.discordapp.com/attachments/1088092124467183616/1120459818268901438/a_8c47aa36de8915783706e52c85b351db.gif"),
             images=[i.EmbedAttachment(
-                url="https://cdn.discordapp.com/attachments/967765571582173214/1097871279652089947/GridArt_20230418_150124888.png")]
+                url="https://cdn.discordapp.com/attachments/967765571582173214/1097873276396642344/GridArt_20230418_135243029.png")]
         )
         components = [
             i.Button(
