@@ -1,0 +1,6 @@
+[General]
+token = Your Bot Token
+scope_ids=Server ID(s)
+
+[IDs]
+app_send_channel_id=Channel in which the application will be sent

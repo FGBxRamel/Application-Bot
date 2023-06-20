@@ -1,10 +1,3 @@
-# Bewerbung mit Buttons machen
-# Deutsche Bewerbung/Englische Bewerbung
-# Fragen: Siehe team-appli channel
-# Nacheinander im Privatchat fragen
-# In spezifischen Channel schicken
-# Knopf: Annehmen/Ablehnen
-
 import configparser as cp
 import sqlite3 as sql
 

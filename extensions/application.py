@@ -1,9 +1,10 @@
 import configparser as cp
 import sqlite3 as sql
-from Translator import Translator
 
 import interactions as i
-from interactions import Embed, BrandColors, Button, ButtonStyle
+from interactions import BrandColors, Button, ButtonStyle, Embed
+
+from Translator import Translator
 
 scope_ids = []
 
