@@ -38,7 +38,7 @@ setup_db()
 
 config = cp.ConfigParser()
 config.read("config.ini")
-bot = i.Client()
+bot = i.Client(token=config["General"]["token"])
 bot.load_extension("interactions.ext.jurigged")
 
 
@@ -48,4 +48,4 @@ async def on_startup():
 
 bot.load_extension("extensions.application")
 
-bot.start(config["General"]["token"])
+bot.start()
