@@ -1,15 +1,52 @@
-import interactions as i
 import configparser as cp
+import sqlite3 as sql
+from Translator import Translator
+
+import interactions as i
+from interactions import Embed, BrandColors, Button, ButtonStyle
 
 scope_ids = []
 
 
 class ApplicationCommand(i.Extension):
     def __init__(self, bot):
-        config = cp.ConfigParser()
-        config.read("config.ini")
+        self.config = cp.ConfigParser()
+        self.config.read("config.ini")
         global scope_ids
-        scope_ids = config["General"]["scope_ids"].split(",")
+        scope_ids = self.config["General"]["scope_ids"].split(",")
+        self.cur = sql.connect("questions.db").cursor()
+
+    async def complete_application(self, user_id: int, language: str):
+        accept_button = Button(
+            label="Annehmen",
+            style=ButtonStyle.SUCCESS,
+            custom_id="button_accept"
+        )
+        decline_button = Button(
+            label="Ablehnen",
+            style=ButtonStyle.DANGER,
+            custom_id="button_decline"
+        )
+        self.cur.execute("SELECT * FROM answers WHERE user_id = ?",
+                         (user_id,))
+        answers = self.cur.fetchone()
+        member = await self.bot.fetch_member(user_id, scope_ids[0])
+        app_embed = Embed(
+            title="♔FALLING SKY♔\nTeam Application",
+            description=f"{str(member.mention)} hat eine Bewerbung abgeschlossen!",
+            color=BrandColors.FUCHSIA.value
+        )
+        translator = Translator("de")
+        for i in range(1, 12):
+            question = translator.translate(f"app.questions.{i}")
+            app_embed.add_field(
+                name=question, value=answers[i])
+        app_send_channel = await self.bot.fetch_channel(self.config["IDs"]["app_send_channel_id"])
+        send_message = await app_send_channel.send(embed=app_embed, components=[accept_button, decline_button])
+        self.cur.execute("INSERT INTO applications VALUES (?, ?, ?)",
+                         (int(send_message.id), language, user_id))
+        self.cur.execute("DELETE FROM user WHERE user_id = ?", (user_id,))
+        self.cur.execute("DELETE FROM answers WHERE user_id = ?", (user_id,))
 
     @i.slash_command(
         name="application",
@@ -61,6 +98,108 @@ class ApplicationCommand(i.Extension):
         ]
         await channel.send(embed=setup_embed, components=components)
         await ctx.send("Setup erfolgreich!", ephemeral=True)
+
+    @i.component_callback("button_german")
+    async def german_application(self, ctx: i.ComponentContext):
+        self.cur.execute("SELECT * FROM applications WHERE user_id = ?",
+                         (int(ctx.author.id),))
+        if self.cur.fetchone() is not None:
+            await ctx.send("Du hast bereits eine Bewerbung!", ephemeral=True)
+            return
+        abort_button = i.Button(
+            label="Abbrechen",
+            style=i.ButtonStyle.DANGER,
+            custom_id="button_abort"
+        )
+        dm_channel: i.models.discord.channel.DM = await ctx.author.fetch_dm()
+        self.cur.execute("INSERT INTO user VALUES (?, ?, ?, ?)",
+                         (int(ctx.author.id), int(ctx.channel.id), 1, "de"))
+        self.cur.execute("INSERT INTO answers (user_id) VALUES (?)",
+                         (int(ctx.author.id),))
+        await dm_channel.send(
+            """Bitte beantworte die nachfolgenden Fragen in diesem Chat.""", components=[abort_button])
+        await dm_channel.send("""*Frage 1/11*\nWie hei\N{Latin Small Letter Sharp S}t du? (Ingame **und** Reallife)""")
+        await ctx.send("Bitte schaue in deine Privatnachrichten!", ephemeral=True)
+
+    @i.component_callback("button_english")
+    async def english_application(self, ctx: i.ComponentContext):
+        self.cur.execute("SELECT * FROM applications WHERE user_id = ?",
+                         (int(ctx.author.id),))
+        if self.cur.fetchone() is not None:
+            await ctx.send("You already have an application!", ephemeral=True)
+            return
+        abort_button = i.Button(
+            label="Abort",
+            style=i.ButtonStyle.DANGER,
+            custom_id="button_abort"
+        )
+        dm_channel: i.models.discord.channel.DM = await ctx.author.fetch_dm()
+        self.cur.execute("INSERT INTO user VALUES (?, ?, ?, ?)",
+                         (int(ctx.author.id), int(ctx.channel.id), 1, "en"))
+        self.cur.execute("INSERT INTO answers (user_id) VALUES (?)",
+                         (int(ctx.author.id),))
+        await dm_channel.send(
+            """Please answer the following questions in this chat.""", components=[abort_button])
+        await dm_channel.send("""*Question 1/11*\nWhat's your name? (Ingame **and** real life)""")
+        await ctx.send("Please check your private messages!", ephemeral=True)
+
+    @i.component_callback("button_abort")
+    async def abort(self, ctx: i.ComponentContext):
+        self.cur.execute("DELETE FROM user WHERE user_id = ?", (int(ctx.author.id),))
+        self.cur.execute("DELETE FROM answers WHERE user_id = ?", (int(ctx.author.id),))
+        await ctx.send(":thumbsup:")
+
+    @i.component_callback("button_accept")
+    async def accept(self, ctx: i.ComponentContext):
+        self.cur.execute("SELECT * FROM applications WHERE message_id = ?",
+                         (int(ctx.message.id),))
+        application = self.cur.fetchone()
+        user = await self.bot.fetch_user(application[2])
+        translator = Translator(application[1])
+        await user.send(translator.translate("app.accepted"))
+        accept_button: Button = ctx.component
+        accept_button.disabled = True
+        components = [accept_button]
+        await ctx.edit_origin(embeds=ctx.message.embeds, components=components)
+        self.cur.execute("DELETE FROM applications WHERE message_id = ?",
+                         (int(ctx.message.id),))
+
+    @i.component_callback("button_decline")
+    async def decline(self, ctx: i.ComponentContext):
+        self.cur.execute("SELECT * FROM applications WHERE message_id = ?",
+                         (int(ctx.message.id),))
+        application = self.cur.fetchone()
+        user = await self.bot.fetch_user(application[2])
+        translator = Translator(application[1])
+        await user.send(translator.translate("app.declined"))
+        decline_button: Button = ctx.component
+        decline_button.disabled = True
+        components = [decline_button]
+        await ctx.edit_origin(embeds=ctx.message.embeds, components=components)
+        self.cur.execute("DELETE FROM applications WHERE message_id = ?",
+                         (int(ctx.message.id),))
+
+    @i.listen()
+    async def on_message_create(self, event: i.events.MessageCreate):
+        if not isinstance(event.message.channel, i.DMChannel) or event.message.author == self.bot.user:
+            return
+        self.cur.execute("SELECT * FROM user WHERE user_id = ?",
+                         (int(event.message.author.id),))
+        user = self.cur.fetchone()
+        if user is None:
+            return
+        translator = Translator(user[3])
+        self.cur.execute(f"UPDATE answers SET answer_{user[2]} = ? WHERE user_id = ?",
+                         (event.message.content, user[0]))
+        if user[2] == 11:
+            await self.complete_application(user[0], user[3])
+            await event.message.channel.send(translator.translate("app.done"))
+            return
+        self.cur.execute(
+            "UPDATE user SET current_question = ? WHERE user_id = ?", (user[2] + 1, user[0]))
+        question = "*" + translator.translate("app.questions.question") + f" {str(user[2] + 1)}/11*\n" +\
+            translator.translate(f"app.questions.{user[2] + 1}")
+        await event.message.channel.send(question)
 
 
 def setup(bot):

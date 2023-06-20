@@ -1,20 +1,17 @@
 import json
-import os
 
 
 class Translator():
-    def __init__(self):
-        self._load_translations()
+    def __init__(self, lang: str = "en"):
+        self._lang = lang
+        self._load_translation()
 
-    def _load_translations(self) -> None:
+    def _load_translation(self) -> None:
         self._translations = {}
-        for file in os.listdir("translations"):
-            with open(f"translations/{file}", "r") as f:
-                self._translations[file.split(".")[0]] = json.load(f)
+        with open(f"translations/{self._lang}.json", "r", encoding="utf8") as f:
+            self._translations = json.load(f)
 
-    def translate(self, lang: str, key: str) -> str:
-        if not lang in self._translations:
-            lang = "en"
-        if not key in self._translations[lang]:
+    def translate(self, key: str) -> str:
+        if not key in self._translations:
             return key
-        return self._translations[lang][key]
+        return self._translations[key]

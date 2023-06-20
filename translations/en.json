@@ -1,0 +1,17 @@
+{
+  "app.done": "Your application has been completed and will be processed immediately! Thank you very much.",
+  "app.accepted": "Your application to FALLING SKY has been accepted! Congratulations!",
+  "app.declined": "Your application for FALLING SKY has been rejected! Thank you for your application!",
+  "app.questions.question": "Question",
+  "app.questions.1": "What is your name? (In-game **and** real life)",
+  "app.questions.2": "How old are you?",
+  "app.questions.3": "How many times have you been legendary? (MP and BR)",
+  "app.questions.4": "What wishes do you have for the clan?",
+  "app.questions.5": "What times are you usually on?",
+  "app.questions.6": "Are you doing school/ training/ study/ work/ or none of these?",
+  "app.questions.7": "Which mode do you play? MP or BR? Please also write what kind (e.g. S&D, TDM, Alca, Iso,...)",
+  "app.questions.8": "Would you be interested in private events? (On other servers)",
+  "app.questions.9": "Would you be willing to support the clan with advertising etc.? (First free of charge, we can talk about payment later).",
+  "app.questions.10": "Important! How would you describe yourself in 5 words?",
+  "app.questions.11": "Is there anything we need to look out for? (e.g. What you don't like so much)"
+}
