@@ -75,7 +75,7 @@ class ApplicationCommand(i.Extension):
             title="♔FALLING SKY♔\nTeam Application",
             description="""<a:6544_heartarrow_purple:956574404647739503> Bitte klicke auf den entsprechenden Button,\
                 um eine Bewerbung zu starten und beantworte danach die Fragen.\n\n\
-                <:bluearrowheartright:921367937829466152> Please click on the corresponding button to start an\
+                <a:bluearrowheartright:921367937829466152> Please click on the corresponding button to start an\
                 application and answer the questions afterwards.""",
             color=i.BrandColors.FUCHSIA.value,
             thumbnail=i.EmbedAttachment(
